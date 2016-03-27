@@ -148,6 +148,14 @@
         }
 
         /* member card styles */
+        #members > .member {
+            margin-bottom: 55px;
+        }
+
+        #members > .member:last-child {
+            margin-bottom:0;
+        }
+
         .member {
             background:#ffffff;
             box-shadow:0px 2px 4px 0px rgba(0,0,0,0.30);
@@ -337,9 +345,157 @@
             integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="
             crossorigin="anonymous"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+
+    <script id="members-list" type="text/mustache">
+        {{#members}}
+        <div class="member">
+            <div class="member-info">
+                <h2 class="name">{{ first_name }} {{ middle_name }} {{ last_name }}</h2>
+                <h2 class="title">{{ professional_title }}</h2>
+
+                <p class="description">{{ description }}</p>
+
+                <section class="skills">
+                    <h2>Skills</h2>
+
+                    <ul>
+                        {{#skills}}
+                        <li>{{.}}</li>
+                        {{/skills}}
+                    </ul>
+                </section>
+
+                <section class="interests">
+                    <h2>Interests</h2>
+
+                    <ul>
+                        {{#interests}}
+                        <li>{{.}}</li>
+                        {{/interests}}
+                    </ul>
+                </section>
+            </div>
+
+            <div class="contact-info">
+                <ul class="social-media">
+                    {{#twitter}}<li><a href="{{.}}" class="twitter-link" target="_blank"></a></li>{{/twitter}}
+                    {{#facebook}}<li><a href="{{.}}" class="facebook-link" target="_blank"></a></li>{{/facebook}}
+                    {{#instagram}}<li><a href="{{.}}" class="instagram-link" target="_blank"></a></li>{{/instagram}}
+                    {{#linkedin}}<li><a href="{{.}}" class="linkedin-link" target="_blank"></a></li>{{/linkedin}}
+                </ul>
+
+                <h4 class="phone-number">{{ phone_number }}</h4>
+
+                <h4 class="email">{{ email }}</h4>
+
+                <ul class="websites">
+                    {{#websites}}
+                    <li><a href="{{url}}" target="_blank"><h4>{{label}}</h4></a></li>
+                    {{/websites}}
+                </ul>
+
+                <div class="avatar">
+                    <img src="{{ avatar }}" />
+                </div>
+            </div>
+        </div>
+        {{/members}}
+    </script>
+
     <script>
+        var _testData = [
+            {
+                "first_name": "Joe",
+                "middle_name": "",
+                "last_name": "Norris",
+                "professional_title": "JoNoDesigns",
+                "description": "Looking to be a bad ass designer and build a client base in Seattle.",
+                "skills": [
+                    "Web Development",
+                    "JavaScript",
+                    "Paralax",
+                    "Web Design",
+                    "Photography",
+                    "Tee Shirt Printing"
+                ],
+                "interests": [
+                    "Music",
+                    "Dope Artwork",
+                    "Networking"
+                ],
+                "phone_number": "(206) 123-4567",
+                "twitter": "http://twitter.com/some_guy",
+                "facebook": "http://facebook.com/some_guy",
+                "instagram": "http://instagram.com/some_guy",
+                "linkedin": "http://linkedin.com/some_guy",
+                "email": "yourboybstar@gmail.com",
+                "avatar": "aramis.jpg",
+                "websites": [
+                    "JoeNoDesigns.com",
+                    "http://JoeNoPhoto.com",
+                    "//JoeNoFolio.com"
+                ]
+            },
+            {
+                "first_name": "David",
+                "middle_name": "D.",
+                "last_name": "Harris",
+                "professional_title": "Cultural Entrepreneur",
+                "description": "I want to be involved in the Central District Community. I'm developing a business to explore how to better serve the Black Community.",
+                "skills": [
+                    "Web Development", "JavaScript", "Paralax", "Advocacy", 
+                    "Photography", "Development Strategies"
+                ],
+                "interests": [
+                    "Hack-a-thons", "Design", "Networking", "Engineering"
+                ],
+                "phone_number": "2061234567",
+                "twitter": "http://twitter.com/dharris",
+                "facebook": "http://facebook.com/dharris",
+                "instagram": "http://instagram.com/dharris",
+                "linkedin": "http://linkedin.com/dharris",
+                "email": "ddharris@gmail.com",
+                "avatar": "monica_360.jpg",
+                "websites": [
+                    "ddharris.com"
+                ]
+            },
+            {
+                "first_name": "Yvonne",
+                "middle_name": "",
+                "last_name": "Smith",
+                "professional_title": "Retired CIO",
+                "description": "I have a lot of skills from my time as a CTO and CIO in big corporations that I would like to share.",
+                "skills": [
+                    "Business planning",
+                    "Budgeting",
+                    "Finance",
+                    "Development Strategies"
+                ],
+                "interests": [
+                    "Community",
+                    "Women's issues",
+                    "Networking"
+                ],
+                "phone_number": "(206 123  - 4567",
+                "twitter": "",
+                "facebook": "",
+                "instagram": "",
+                "linkedin": "http://linkedin.com/yvonne_smith",
+                "email": "ysmith@gmail.com",
+                "avatar": "k_wyking_garrett.jpg",
+                "websites": [
+                    "",
+                    ""
+                ]
+            }
+        ];
+
         $(document).ready(function () {
             initFilterIconSelection();
+            normalizeMembersData(_testData);
+            renderMembersList();
 
             $('.view-filter-icon').click(function () {
                 $('.view-filter-icon').removeClass('selected');
@@ -354,6 +510,50 @@
                 var filterType = $('#members').attr('data-filter-type') || 'cards';
                 $('.view-filter-icon[data-filter-type="' + filterType + '"]')
                     .addClass('selected');
+            }
+
+            function renderMembersList() {
+                var template = $('#members-list').html();
+                var output = Mustache.render(template, {members: _testData});
+                $('#members').html(output);
+            }
+
+            function normalizeMembersData(data) {
+                var protocolStartRegex = /^[a-zA-Z]+:/,
+                    doubleSlashStartRegex = /^\/\//;
+
+                _testData.forEach(function (member) {
+                    var link = document.createElement('a');
+
+                    // normalize URLs and pair each w/ a more readable label
+                    member.websites = member.websites.map(function (urlEntry) {
+                        var url = urlEntry;
+                        if (!protocolStartRegex.test(urlEntry)) {
+                            var prefix = doubleSlashStartRegex.test(urlEntry) ? 'http:' : 'http://';
+                            url = prefix + urlEntry;
+                        }
+
+                        link.href = url;
+
+                        // link.hostname will sometimes change the case of the URL host,
+                        // so instead we look for the host in the original URL
+                        var hostStart = urlEntry.toLowerCase().indexOf(link.hostname.toLowerCase()),
+                            label = urlEntry.substring(hostStart, hostStart + link.hostname.length);
+
+                        return {
+                            url: url,
+                            label: label
+                        };
+                    });
+
+                    // if the phone number looks like a US number (has 10 digits), normalize it
+                    var phoneNumberDigits = member.phone_number.replace(/[^0-9]/g, '');
+                    if (phoneNumberDigits.length == 10) {
+                        member.phone_number = "(" + phoneNumberDigits.substring(0, 3) + ")\u00a0"
+                            + phoneNumberDigits.substring(3, 6) + "\u00a0-\u00a0"
+                            + phoneNumberDigits.substring(6, 10);
+                    }
+                });
             }
         });
     </script>
@@ -390,60 +590,6 @@
     </div>
 
     <div id="members" class="membership-card-view">
-        <div class="member">
-            <div class="member-info">
-                <h2 class="name">Joe Norris</h2>
-                <h2 class="title">JoNoDesigns</h2>
-
-                <p class="description">Looking to be a bad ass designer and build a client base in Seattle.</p>
-
-                <section class="skills">
-                    <h2>Skills</h2>
-
-                    <ul>
-                        <li>Web Development</li>
-                        <li>JavaScript</li>
-                        <li>Paralax</li>
-                        <li>Web Design</li>
-                        <li>Photography</li>
-                        <li>Tee shirt printing</li>
-                    </ul>
-                </section>
-
-                <section class="interests">
-                    <h2>Interests</h2>
-
-                    <ul>
-                        <li>Music</li>
-                        <li>Dope Artwork</li>
-                        <li>Networking</li>
-                    </ul>
-                </section>
-            </div>
-
-            <div class="contact-info">
-                <ul class="social-media">
-                    <li><a href="http://twitter.com/joenorris" class="twitter-link"></a></li>
-                    <li><a href="http://facebook.com/joenorris" class="facebook-link"></a></li>
-                    <li><a href="http://instagram.com/joenorris" class="instagram-link"></a></li>
-                    <li><a href="http://linkedin.com/joenorris" class="linkedin-link"></a></li>
-                </ul>
-
-                <h4 class="phone-number">(206) 123-4567</h4>
-
-                <h4 class="email">yourboybstar@gmail.com</h4>
-
-                <ul class="websites">
-                    <li><a href="JoeNoDesigns.com"><h4>JoeNoDesigns.com</h4></a></li>
-                    <li><a href="JoeNoPhoto.com"><h4>JoeNoPhoto.com</h4></a></li>
-                    <li><a href="JoeNoFolio.com"><h4>JoeNoFolio.com</h4></a></li>
-                </ul>
-
-                <div class="avatar">
-                    <img src="aramis.jpg" />
-                </div>
-            </div>
-        </div>
     </div>
 </body>
 </html>
