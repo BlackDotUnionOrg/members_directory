@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- TODO: move to separate files -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+    <style>
+        /* from the template style */
+        h1 {
+            margin-left: 157px;
+            font-size: 36px;
+
+            color: #3a3a3a;
+            line-height: 34px;
+        }
+
+
+        /* for the members directory only */
+        nav {
+            position: relative;
+        }
+
+        a.profile {
+            font-size:16px;
+            position:absolute;
+            right:46px;
+        }
+
+        a.profile:after {
+            content: "\f007";
+            font-family: FontAwesome;
+            margin-left: 8px;
+        }
+
+        #member-filters {
+            background:#555555;
+            border:1px solid #979797;
+            height:94px;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+
+            margin-bottom: 38px;
+        }
+
+        #member-filters > div {
+            display: inline-block;
+            height:94px;
+            vertical-align:top;
+
+            margin: 9px 0 22px 0;
+        }
+
+        #member-filters label {
+            display: block;
+            font-size:14px;
+            color:#ffffff;
+            margin-bottom:10px;
+        }
+
+        .view-filter-icon {
+            display: inline-block;
+            font-size:32px;
+            color:#9d9b98;
+            margin-right:12px;
+            cursor:pointer;
+        }
+
+        .view-filter-icon.selected {
+            color: #000;
+        }
+
+        .view-filter-icon[data-filter-type=list]::before {
+            content: "\f03a";
+            font-family: FontAwesome;
+        }
+
+        .view-filter-icon[data-filter-type=cards]::before {
+            content: "\f0c9";
+            font-family: FontAwesome;
+        }
+
+        .view-filter-icon[data-filter-type=list]::after {
+            content: "List";
+            font-size:10px;
+            color:#cdcdcd;
+            display: block;
+        }
+
+        .view-filter-icon[data-filter-type=cards]::after {
+            content: "Cards";
+            font-size:10px;
+            color:#cdcdcd;
+            display: block;
+        }
+
+        #member-sort {
+            background-image:linear-gradient(-180deg, #f2f2f2 0%, #d4d4d4 100%);
+            border:1px solid #979797;
+            box-shadow:0px 1px 2px 0px rgba(0,0,0,0.20), inset 0px 2px 0px 0px #ffffff;
+            border-radius:3px;
+            width:128px;
+            height:34px;
+        }
+
+        #search-filter input {
+            background:#ffffff;
+            border:1px solid #979797;
+            box-shadow:inset 0px 1px 3px 0px rgba(0,0,0,0.50);
+            border-radius:3px;
+            width:298px;
+            height:34px;
+            text-indent:11px;
+        }
+
+        #search-filter input::-webkit-input-placeholder {
+            font-style: italic;
+        }
+
+        #search-filter input::-moz-placeholder {
+            font-style: italic;
+        }
+
+        #search-filter button {
+            font-size: 0;
+            background-color: transparent;
+            border-width:0;
+        }
+
+        #search-filter button:focus {
+            outline: none;
+        }
+
+        #search-filter button::before {
+            display:inline-block;
+            width: 37px;
+            height: 37px;
+            line-height: 37px;
+
+            font-size: 14px;
+            content: "\f002";
+            font-family: FontAwesome;
+            color:#fff;
+            background-color:#000;
+
+            border-radius:50%;
+        }
+
+        /* member card styles */
+        .member {
+            background:#ffffff;
+            box-shadow:0px 2px 4px 0px rgba(0,0,0,0.30);
+            border-radius:8px;
+            margin-right: 30px;
+
+            display:flex;
+            flex-direction:row;
+            align-items:stretch;
+        }
+
+        .member ul {
+            padding:0;
+        }
+
+        .member > div {
+            display: inline-block;
+            position: relative;
+            margin:0;
+            padding:0 20px;
+        }
+
+        .member > .member-info {
+            font-size:14px;
+            color:#4a4a4a;
+            flex-grow:1;
+
+            /* important for flex box. without, width percent of .contact info is not guaranteed */
+            width:0;
+        }
+
+        .member > .member-info > h2 {
+            font-size:20px;
+            font-weight: 400;
+            display: inline-block;
+        }
+
+        .member > .member-info > h2.name {
+            font-weight: 500;
+            float:left;
+        }
+
+        .member > .member-info > h2.title {
+            float:right;
+        }
+
+        .member > .member-info > p.description {
+            clear: both;
+            margin: 20px 9% 17px 9%;
+            padding-bottom:32px;
+
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .member > .member-info li {
+            display: inline-block;
+            list-style: none;
+            width: 158px;
+            line-height:22px;
+            margin-bottom:13px;
+        }
+
+        .member > .member-info li::before {
+            content: '';
+            display: inline-block;
+            background: #4a4a4a;
+            box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.12),
+                        0px 8px 8px 0px rgba(0,0,0,0.24);
+            width:7px;
+            height:7px;
+            border-radius:100%;
+            margin-right: 6px;
+            line-height:22px;
+        }
+
+        .member > .contact-info {
+            background-color: #000;
+            color: #fff;
+            width:35%;
+            max-width:35%;
+            border-top-right-radius:8px;
+            border-bottom-right-radius:8px;
+        }
+
+        .member > .contact-info a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .member > .contact-info a:visited {
+            color: #fff;
+        }
+
+        .member > .contact-info h4 {
+            font-size:18px;
+            margin:0;
+        }
+
+        .member > .contact-info h4.phone-number {
+            margin-bottom:32px;
+        }
+
+        .member > .contact-info h4.email {
+            margin-bottom:9px;
+        }
+
+        .member > .contact-info ul.websites {
+            list-style:none;
+            margin:0;
+        }
+
+        .member ul.social-media {
+            padding: 0;
+            margin-top: 18px;
+            margin-bottom: 29px;
+        }
+
+        .member ul.social-media li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .member .avatar {
+            position:absolute;
+            top: -22px;
+            right: -22px;
+            border-radius: 50%;
+
+            border:1px solid #979797;
+            width:155px;
+            height:160px;
+        }
+
+        .member .avatar img {
+            width:155px;
+            height:160px;
+            border-radius: 50%;
+        }
+
+        /* membership list view overrides */
+        #members[data-filter-type=list] .member {
+            max-height: 160px;
+        }
+
+        #members[data-filter-type=list] .skills,
+        #members[data-filter-type=list] .interests,
+        #members[data-filter-type=list] .websites {
+            display:none;
+        }
+
+        #members[data-filter-type=list] .member > .contact-info h4.phone-number,
+        #members[data-filter-type=list] ul.social-media {
+            margin-bottom: 9px;
+        }
+
+        #members[data-filter-type=list] .member > .member-info > p.description {
+            border-bottom-width:0;
+        }
+
+        /* icon classes */
+        .facebook-link::before {
+            content: "\f09a";
+            font-family: FontAwesome;
+            font-size: 20px;
+        }
+
+        .twitter-link::before {
+            content: "\f099";
+            font-family: FontAwesome;
+            font-size: 20px;
+        }
+
+        .instagram-link::before {
+            content: "\f16d";
+            font-family: FontAwesome;
+            font-size: 20px;
+        }
+
+        .linkedin-link::before {
+            content: "\f0e1";
+            font-family: FontAwesome;
+            font-size: 20px;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-2.2.2.min.js"
+            integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="
+            crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            initFilterIconSelection();
+
+            $('.view-filter-icon').click(function () {
+                $('.view-filter-icon').removeClass('selected');
+
+                $(this).addClass('selected');
+
+                var filterType = $(this).attr('data-filter-type');
+                $('#members').attr('data-filter-type', filterType);
+            });
+
+            function initFilterIconSelection() {
+                var filterType = $('#members').attr('data-filter-type') || 'cards';
+                $('.view-filter-icon[data-filter-type="' + filterType + '"]')
+                    .addClass('selected');
+            }
+        });
+    </script>
+</head>
+<body>
+    <nav>
+        <a class="profile" href="">Hello Shayla</a>
+    </nav>
+
+    <h1>Meet our members</h1>
+
+    <div id="member-filters">
+        <div id="sort-by-filter">
+            <label>Sort by:</label>
+            <select id="member-sort">
+                <option value="newest_first" selected>Newest first</option>
+                <option value="oldest_first">Oldest first</option>
+                <option value="name">Sort by name</option>
+                <option value="profession_or_company">Sort by profession or company</option>
+            </select>
+        </div>
+
+        <div id="search-filter">
+            <label>Search:</label>
+            <input type="text" placeholder="search for a name, skill or interest"/>
+            <button>Search</button>
+        </div>
+
+        <div id="views-filter">
+            <label>View as:</label>
+            <div class="view-filter-icon" data-filter-type="list"></div>
+            <div class="view-filter-icon" data-filter-type="cards"></div>
+        </div>
+    </div>
+
+    <div id="members" class="membership-card-view">
+        <div class="member">
+            <div class="member-info">
+                <h2 class="name">Joe Norris</h2>
+                <h2 class="title">JoNoDesigns</h2>
+
+                <p class="description">Looking to be a bad ass designer and build a client base in Seattle.</p>
+
+                <section class="skills">
+                    <h2>Skills</h2>
+
+                    <ul>
+                        <li>Web Development</li>
+                        <li>JavaScript</li>
+                        <li>Paralax</li>
+                        <li>Web Design</li>
+                        <li>Photography</li>
+                        <li>Tee shirt printing</li>
+                    </ul>
+                </section>
+
+                <section class="interests">
+                    <h2>Interests</h2>
+
+                    <ul>
+                        <li>Music</li>
+                        <li>Dope Artwork</li>
+                        <li>Networking</li>
+                    </ul>
+                </section>
+            </div>
+
+            <div class="contact-info">
+                <ul class="social-media">
+                    <li><a href="http://twitter.com/joenorris" class="twitter-link"></a></li>
+                    <li><a href="http://facebook.com/joenorris" class="facebook-link"></a></li>
+                    <li><a href="http://instagram.com/joenorris" class="instagram-link"></a></li>
+                    <li><a href="http://linkedin.com/joenorris" class="linkedin-link"></a></li>
+                </ul>
+
+                <h4 class="phone-number">(206) 123-4567</h4>
+
+                <h4 class="email">yourboybstar@gmail.com</h4>
+
+                <ul class="websites">
+                    <li><a href="JoeNoDesigns.com"><h4>JoeNoDesigns.com</h4></a></li>
+                    <li><a href="JoeNoPhoto.com"><h4>JoeNoPhoto.com</h4></a></li>
+                    <li><a href="JoeNoFolio.com"><h4>JoeNoFolio.com</h4></a></li>
+                </ul>
+
+                <div class="avatar">
+                    <img src="aramis.jpg" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
