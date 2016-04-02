@@ -2,7 +2,9 @@
 <html>
 <head>
 <!-- TODO: move to separate files -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remodal/1.0.7/remodal-default-theme.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remodal/1.0.7/remodal.css"/>
 
     <style>
         /* from the template style */
@@ -301,6 +303,7 @@
         /* membership list view overrides */
         #members[data-filter-type=list] .member {
             max-height: 160px;
+            cursor: pointer;
         }
 
         #members[data-filter-type=list] .skills,
@@ -342,6 +345,22 @@
             font-family: FontAwesome;
             font-size: 20px;
         }
+
+        /* modal styles */
+        .remodal-wrapper {
+            text-align: inherit;
+        }
+
+        .remodal {
+            max-width: none;
+            padding: 0;
+
+            position: fixed;
+            top: 128px;
+            left: 2.5%;
+
+            width: 95%;
+        }
     </style>
 
     <script src="https://code.jquery.com/jquery-2.2.2.min.js"
@@ -349,6 +368,7 @@
             crossorigin="anonymous"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/remodal/1.0.7/remodal.min.js"></script>
 
     <script id="members-list" type="text/mustache">
         {{#members}}
@@ -545,6 +565,8 @@
 
             $('#member-sort').change(handleMemberSortChange);
 
+            $('body').on('click', '#members[data-filter-type=list] .member', launchMemberCardModal);
+
             function initFilterIconSelection() {
                 var filterType = $('#members').attr('data-filter-type') || 'cards';
                 $('.view-filter-icon[data-filter-type="' + filterType + '"]')
@@ -615,6 +637,10 @@
                         return true;
                     }
 
+                    if (member.professional_title.toLowerCase().indexOf(searchTerm) != -1) {
+                        return true;
+                    }
+
                     var hasSkill = member.skills.some(function (skill) {
                         return skill.toLowerCase().indexOf(searchTerm) != -1;
                     });
@@ -646,6 +672,11 @@
                 displayedMembers.sort(compareFunction);
 
                 renderMembersList();
+            }
+
+            // launches full card modal when the list view is clicked
+            function launchMemberCardModal(event) {
+                $(event.target).closest('.member').clone().remodal().open();
             }
 
             // utility functions
