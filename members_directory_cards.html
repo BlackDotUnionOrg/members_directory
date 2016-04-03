@@ -375,6 +375,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/remodal/1.0.7/remodal.min.js"></script>
+    <script src="vendor/assets/components/crypto-js/crypto-js.js"></script>
 
     <script id="members-list" type="text/mustache">
         {{#members}}
@@ -435,6 +436,19 @@
     <script>
         var TEST = true;
         if (TEST) {
+            window.userobj = {
+                "userid":"9999",
+                "membership_id":"8888",
+                "user_data":{
+                    "username":"blackdotunion",
+                    "email":"blackdotunion@gmail.comm",
+                    "name":"Some One",
+                    "last_login":"2016-04-03 15:07:08",
+                    "avatar":"\/\/gopaywall.com\/uploads\/",
+                    "country":"US"
+                }
+            };
+
             gopaywall_loaded();
         }
 
@@ -472,6 +486,14 @@
                     displayedMembers;
 
                 getMembersData(initializeMembersPage);
+                setCurrentUserName();
+
+                function setCurrentUserName() {
+                    var firstName = userobj.user_data.name.split(/\s+/)[0];
+                    $('.current-user-fname').each(function () {
+                        $(this).text(firstName);
+                    });
+                }
 
                 function initializeMembersPage(allData) {
                     allMembers = allData;
@@ -507,7 +529,7 @@
                         params.test = 1;
                     } else {
                         params.user = userobj.user_data.username;
-                        params.auth_key = '';// TODO
+                        params.auth_key = makeAuthKey();
                     }
 
                     $.ajax({
@@ -521,6 +543,19 @@
                                 .text("Sorry, but the members directory is unavailable right now!");
                         }
                     });
+                }
+
+                function makeAuthKey() {
+                    var minute = (new Date()).getMinute(),
+                        // TODO: should have test in case gopaywall changes how this info is structured
+                        body = [
+                            userobj.user_data.email,
+                            userobj.user_data.name,
+                            userobj.userid,
+                            userobj.membership_id
+                        ].join(':');
+
+                    return CryptoJS.HmacSHA1(body, userobj.user_data.last_login + minute);
                 }
 
                 function initFilterIconSelection() {
@@ -651,7 +686,7 @@
 </head>
 <body>
     <nav>
-        <a class="profile" href="">Hello Shayla</a>
+        <a class="profile" href="">Hello <span class="current-user-fname"></span></a>
     </nav>
 
     <h1>Meet our members</h1>
